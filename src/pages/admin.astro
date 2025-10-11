@@ -1,0 +1,93 @@
+---
+// src/pages/admin.astro (VERSIÓN FINAL Y CORREGIDA)
+
+// -------------------
+// --- IMPORTACIONES ---
+// -------------------
+import Layout from '@/layouts/Layout.astro';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import LogoutButton from '@/components/LogoutButton';
+import AdminTicketManager, { type AdminTicket } from '@/components/AdminTicketManager';
+import AdminAppointmentList, { type Appointment } from '@/components/AdminAppointmentList';
+
+// ------------------------------------
+// --- LÓGICA DE SERVIDOR Y SEGURIDAD ---
+// ------------------------------------
+const supabase = createSupabaseServerClient(Astro.cookies);
+const { data: { session } } = await supabase.auth.getSession();
+
+if (!session) {
+    return Astro.redirect('/login');
+}
+const user = session.user;
+
+const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+if (!profile || profile.role !== 'administrador') {
+    return Astro.redirect('/dashboard');
+}
+
+// -------------------------
+// --- OBTENCIÓN DE DATOS (CORREGIDO) ---
+// -------------------------
+
+// Ahora la consulta es más limpia y funciona porque la columna 'email' existe en 'profiles'.
+const { data: allTickets, error: ticketsError } = await supabase
+    .from('tickets')
+    .select(`
+        id, created_at, title, status, priority,
+        profiles ( full_name, email )
+    `)
+    .order('created_at', { ascending: false });
+
+if (ticketsError) {
+    console.error("Error al obtener los tickets:", ticketsError.message);
+}
+
+// Aplicamos la misma consulta corregida para las citas.
+const { data: allAppointments, error: apptsError } = await supabase
+    .from('appointments')
+    .select(`
+        id, appointment_date, notes, status,
+        profiles ( full_name, email )
+    `)
+    .order('appointment_date', { ascending: true });
+
+if (apptsError) {
+    console.error("Error al obtener las citas:", apptsError.message);
+}
+---
+
+<Layout title="Panel de Administrador">
+    <div class="bg-muted/40 min-h-screen p-4 sm:p-8">
+        <div class="max-w-7xl mx-auto space-y-8">
+
+            <header class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">Panel de Administrador</h1>
+                    <p class="text-muted-foreground">
+                        Sesión iniciada como {user.email}.
+                    </p>
+                </div>
+                <LogoutButton client:load />
+            </header>
+
+            <main class="space-y-8">
+                <section class="bg-card p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4">Gestión de Tickets</h2>
+                    <AdminTicketManager initialTickets={allTickets as AdminTicket[] || []} client:load />
+                </section>
+
+                <section class="bg-card p-6 rounded-lg shadow-lg">
+                    <h2 class="text-2xl font-bold mb-4">Gestión de Citas</h2>
+                    <AdminAppointmentList initialAppointments={allAppointments as Appointment[] || []} client:load />
+                </section>
+            </main>
+
+        </div>
+    </div>
+</Layout>
