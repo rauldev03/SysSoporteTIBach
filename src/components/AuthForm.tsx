@@ -36,11 +36,16 @@ export default function AuthForm() {
                 // Usamos el usuario que ya nos devolvió el login
                 const user = data.user;
                 if (user) {
-                    const { data: profile } = await supabase
+                    const { data: profile, error: profileError } = await supabase
                         .from('profiles')
                         .select('role')
                         .eq('id', user.id)
                         .single();
+
+                    if (profileError) {
+                        console.error("Error al obtener el perfil del usuario:", profileError);
+                    }
+                    console.log("Rol obtenido desde la base de datos:", profile?.role);
 
                     setMessage('¡Inicio de sesión exitoso! Redirigiendo...');
 
