@@ -1,11 +1,27 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import Welcome from "../components/Welcome.astro";
+import Layout from "../layouts/Layout.astro";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const supabase = createSupabaseServerClient(Astro.cookies);
+const {
+	data: { user },
+} = await supabase.auth.getUser();
+
+if (user) {
+	const { data: profile } = await supabase
+		.from("profiles")
+		.select("role")
+		.eq("id", user.id)
+		.single();
+
+	if (profile?.role === "administrador") {
+		return Astro.redirect("/admin");
+	}
+	return Astro.redirect("/dashboard");
+}
 ---
 
-<Layout>
+<Layout title="Inicio">
 	<Welcome />
 </Layout>

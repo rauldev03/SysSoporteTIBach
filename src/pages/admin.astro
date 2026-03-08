@@ -1,93 +1,112 @@
 ---
-// src/pages/admin.astro (VERSIÓN FINAL Y CORREGIDA)
+// src/pages/admin.astro
+import Layout from "@/layouts/Layout.astro";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import AdminSidebar from "@/components/AdminSidebar";
+import AdminHeader from "@/components/AdminHeader";
+import AdminTicketManager, {
+    type AdminTicket,
+} from "@/components/AdminTicketManager";
+import AdminAppointmentList, {
+    type Appointment,
+} from "@/components/AdminAppointmentList";
 
-// -------------------
-// --- IMPORTACIONES ---
-// -------------------
-import Layout from '@/layouts/Layout.astro';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import LogoutButton from '@/components/LogoutButton';
-import AdminTicketManager, { type AdminTicket } from '@/components/AdminTicketManager';
-import AdminAppointmentList, { type Appointment } from '@/components/AdminAppointmentList';
-
-// ------------------------------------
-// --- LÓGICA DE SERVIDOR Y SEGURIDAD ---
-// ------------------------------------
+// Lógica de servidor para protección de ruta
 const supabase = createSupabaseServerClient(Astro.cookies);
-const { data: { session } } = await supabase.auth.getSession();
+const {
+    data: { user },
+} = await supabase.auth.getUser();
 
-if (!session) {
-    return Astro.redirect('/login');
+if (!user) {
+    return Astro.redirect("/login");
 }
-const user = session.user;
 
 const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
     .single();
 
-if (!profile || profile.role !== 'administrador') {
-    return Astro.redirect('/dashboard');
+if (!profile || profile.role !== "administrador") {
+    return Astro.redirect("/dashboard");
 }
 
-// -------------------------
-// --- OBTENCIÓN DE DATOS (CORREGIDO) ---
-// -------------------------
-
-// Ahora la consulta es más limpia y funciona porque la columna 'email' existe en 'profiles'.
-const { data: allTickets, error: ticketsError } = await supabase
-    .from('tickets')
-    .select(`
+// Obtener datos
+const { data: allTickets } = await supabase
+    .from("tickets")
+    .select(
+        `
         id, created_at, title, status, priority,
         profiles ( full_name, email )
-    `)
-    .order('created_at', { ascending: false });
+    `,
+    )
+    .order("created_at", { ascending: false });
 
-if (ticketsError) {
-    console.error("Error al obtener los tickets:", ticketsError.message);
-}
-
-// Aplicamos la misma consulta corregida para las citas.
-const { data: allAppointments, error: apptsError } = await supabase
-    .from('appointments')
-    .select(`
+const { data: allAppointments } = await supabase
+    .from("appointments")
+    .select(
+        `
         id, appointment_date, notes, status,
         profiles ( full_name, email )
-    `)
-    .order('appointment_date', { ascending: true });
-
-if (apptsError) {
-    console.error("Error al obtener las citas:", apptsError.message);
-}
+    `,
+    )
+    .order("appointment_date", { ascending: true });
 ---
 
-<Layout title="Panel de Administrador">
-    <div class="bg-muted/40 min-h-screen p-4 sm:p-8">
-        <div class="max-w-7xl mx-auto space-y-8">
+<Layout title="Admin Console | SupportOS">
+    <div class="flex min-h-screen bg-[#F8FAFC]">
+        <!-- Sidebar -->
+        <AdminSidebar user={user} client:load />
 
-            <header class="flex justify-between items-center">
-                <div>
-                    <h1 class="text-3xl font-bold">Panel de Administrador</h1>
-                    <p class="text-muted-foreground">
-                        Sesión iniciada como {user.email}.
-                    </p>
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Header -->
+            <AdminHeader totalTickets={allTickets?.length || 0} client:load />
+
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-[1600px] mx-auto space-y-8">
+                    {
+                        /* El Ticket Manager ya tiene el diseño de tabla premium */
+                    }
+                    <AdminTicketManager
+                        initialTickets={(allTickets as AdminTicket[]) || []}
+                        client:load
+                    />
+
+                    {
+                        /* Las citas también se muestran debajo (puedes estilizarlas más luego si deseas) */
+                    }
+                    <section
+                        class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md"
+                    >
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-slate-800">
+                                Próximas Citas
+                            </h2>
+                        </div>
+                        <AdminAppointmentList
+                            initialAppointments={(allAppointments as Appointment[]) ||
+                                []}
+                            client:load
+                        />
+                    </section>
                 </div>
-                <LogoutButton client:load />
-            </header>
-
-            <main class="space-y-8">
-                <section class="bg-card p-6 rounded-lg shadow-lg">
-                    <h2 class="text-2xl font-bold mb-4">Gestión de Tickets</h2>
-                    <AdminTicketManager initialTickets={allTickets as AdminTicket[] || []} client:load />
-                </section>
-
-                <section class="bg-card p-6 rounded-lg shadow-lg">
-                    <h2 class="text-2xl font-bold mb-4">Gestión de Citas</h2>
-                    <AdminAppointmentList initialAppointments={allAppointments as Appointment[] || []} client:load />
-                </section>
             </main>
-
         </div>
     </div>
 </Layout>
+
+<style is:global>
+    /* Optimizaciones de fuente para el look premium */
+    body {
+        font-family:
+            "Inter",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Roboto,
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+</style>

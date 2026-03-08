@@ -31,10 +31,27 @@ export default function AuthForm() {
                     password,
                 });
                 if (error) throw error;
-                setMessage('¡Inicio de sesión exitoso! Redirigiendo...');
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 500);
+
+                // --- MEJORA DE REDIRECCIÓN ---
+                // Obtenemos los datos del usuario para ver su rol
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('role')
+                        .eq('id', user.id)
+                        .single();
+
+                    setMessage('¡Inicio de sesión exitoso! Redirigiendo...');
+
+                    setTimeout(() => {
+                        if (profile?.role === 'administrador') {
+                            window.location.href = '/admin';
+                        } else {
+                            window.location.href = '/dashboard';
+                        }
+                    }, 500);
+                }
             } else {
                 // Lógica de Registro
                 const { error } = await supabase.auth.signUp({
