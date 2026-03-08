@@ -1,0 +1,116 @@
+---
+// src/pages/admin.astro
+import Layout from "@/layouts/Layout.astro";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import AdminSidebar from "@/components/AdminSidebar";
+import AdminHeader from "@/components/AdminHeader";
+import AdminTicketManager, {
+    type AdminTicket,
+} from "@/components/AdminTicketManager";
+import AdminAppointmentList, {
+    type Appointment,
+} from "@/components/AdminAppointmentList";
+
+// Lógica de servidor para protección de ruta
+const supabase = createSupabaseServerClient(Astro.cookies);
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+    console.log("[ADMIN.ASTRO] No user found in session, redirecting to /login");
+    return Astro.redirect("/login");
+}
+
+const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+console.log(`[ADMIN.ASTRO] User ID: ${user.id}, Profile:`, profile, `Error:`, error);
+
+if (!profile || profile.role !== "administrador") {
+    console.log("[ADMIN.ASTRO] Profile is not admin, redirecting to /dashboard");
+    return Astro.redirect("/dashboard");
+}
+
+// Obtener datos
+const { data: allTickets } = await supabase
+    .from("tickets")
+    .select(
+        `
+        id, created_at, title, status, priority,
+        profiles ( full_name, email )
+    `,
+    )
+    .order("created_at", { ascending: false });
+
+const { data: allAppointments } = await supabase
+    .from("appointments")
+    .select(
+        `
+        id, appointment_date, notes, status,
+        profiles ( full_name, email )
+    `,
+    )
+    .order("appointment_date", { ascending: true });
+---
+
+<Layout title="Admin Console | SupportOS">
+    <div class="flex min-h-screen bg-[#F8FAFC]">
+        <!-- Sidebar -->
+        <AdminSidebar user={user} client:load />
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <!-- Header -->
+            <AdminHeader totalTickets={allTickets?.length || 0} client:load />
+
+            <!-- Content -->
+            <main class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-[1600px] mx-auto space-y-8">
+                    {
+                        /* El Ticket Manager ya tiene el diseño de tabla premium */
+                    }
+                    <AdminTicketManager
+                        initialTickets={(allTickets as AdminTicket[]) || []}
+                        client:load
+                    />
+
+                    {
+                        /* Las citas también se muestran debajo (puedes estilizarlas más luego si deseas) */
+                    }
+                    <section
+                        class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md"
+                    >
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold text-slate-800">
+                                Próximas Citas
+                            </h2>
+                        </div>
+                        <AdminAppointmentList
+                            initialAppointments={(allAppointments as Appointment[]) ||
+                                []}
+                            client:load
+                        />
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+</Layout>
+
+<style is:global>
+    /* Optimizaciones de fuente para el look premium */
+    body {
+        font-family:
+            "Inter",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Roboto,
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+</style>

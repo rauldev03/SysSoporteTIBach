@@ -1,0 +1,90 @@
+---
+// src/pages/dashboard.astro
+
+// Importamos el Layout, como siempre.
+import Layout from "@/layouts/Layout.astro";
+// IMPORTANTE: Importamos el CREADOR de clientes de SERVIDOR desde la nueva ubicación.
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+// Importamos los componentes de React que necesitamos.
+import LogoutButton from "@/components/LogoutButton";
+import TicketForm from "@/components/TicketForm";
+import TicketList, { type Ticket } from "@/components/TicketList";
+import AppointmentForm from "@/components/AppointmentForm";
+
+// --- LÓGICA DE PROTECCIÓN DE RUTA (LA PARTE CRÍTICA) ---
+
+// 1. Creamos un cliente de Supabase para el SERVIDOR.
+// Le pasamos `Astro.cookies` para que pueda leer la sesión que el navegador envía.
+const supabase = createSupabaseServerClient(Astro.cookies);
+
+// 2. Usamos el cliente del servidor para pedir el usuario actual de forma segura.
+// getUser() verifica la sesión contactando al servidor de Supabase Auth.
+const {
+    data: { user },
+} = await supabase.auth.getUser();
+
+// 3. Esta es la comprobación de seguridad.
+// Si user es null, significa que no hay un usuario válido. Lo redirigimos a login.
+if (!user) {
+    console.log("[DASHBOARD.ASTRO] No user found in session, redirecting to /login");
+    return Astro.redirect("/login");
+}
+
+// 4. Verificamos el rol para redirigir administradores a su panel
+const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+console.log(`[DASHBOARD.ASTRO] User ID: ${user.id}, Profile:`, profile, `Error:`, error);
+
+if (profile?.role === "administrador") {
+    console.log("[DASHBOARD.ASTRO] Profile is admin, redirecting to /admin");
+    return Astro.redirect("/admin");
+}
+
+// Si llegamos hasta aquí, significa que la sesión es VÁLIDA.
+
+// Obtenemos los tickets del usuario (esto debería funcionar si la sesión es válida).
+let userTickets: Ticket[] = [];
+const { data: tickets } = await supabase
+    .from("tickets")
+    .select("id, created_at, title, status, priority")
+    .eq("client_id", user.id)
+    .order("created_at", { ascending: false });
+
+if (tickets) {
+    userTickets = tickets;
+}
+---
+
+<Layout title="Mi Panel de Control">
+    <div class="bg-muted/40 min-h-screen p-4 sm:p-8">
+        <div class="max-w-7xl mx-auto space-y-8">
+            <header class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold">Panel de Cliente</h1>
+                    <p class="text-muted-foreground">
+                        Bienvenido, <span class="font-semibold"
+                            >{user?.email}</span
+                        >
+                    </p>
+                </div>
+                <LogoutButton client:load />
+            </header>
+
+            <main class="grid lg:grid-cols-3 gap-8">
+                <div class="space-y-4">
+                    <TicketForm client:load />
+                </div>
+                <div class="space-y-4">
+                    <TicketList tickets={userTickets} />
+                </div>
+                <div class="space-y-4">
+                    <AppointmentForm client:load />
+                </div>
+            </main>
+        </div>
+    </div>
+</Layout>
