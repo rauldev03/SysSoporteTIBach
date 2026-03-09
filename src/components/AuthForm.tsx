@@ -52,6 +52,8 @@ export default function AuthForm() {
                     setTimeout(() => {
                         if (profile?.role === 'administrador') {
                             window.location.href = '/admin';
+                        } else if (profile?.role === 'superadmin') {
+                            window.location.href = '/superadmin';
                         } else {
                             window.location.href = '/dashboard';
                         }

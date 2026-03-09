@@ -23,6 +23,7 @@ export default function TicketForm() {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [priority, setPriority] = useState('Media');
+    const [incidentType, setIncidentType] = useState('Hardware');
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,9 +41,11 @@ export default function TicketForm() {
             return;
         }
 
+        const finalTitle = `[${incidentType}] ${title}`;
+
         // Insertamos el nuevo ticket en la base de datos
         const { error } = await supabase.from('tickets').insert({
-            title,
+            title: finalTitle,
             description,
             priority,
             client_id: user.id, // Asociamos el ticket al usuario logueado
@@ -68,6 +71,33 @@ export default function TicketForm() {
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-3">
+                        <Label>Tipo de Incidencia</Label>
+                        <div className="flex gap-4">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="incidentType"
+                                    value="Hardware"
+                                    checked={incidentType === 'Hardware'}
+                                    onChange={(e) => setIncidentType(e.target.value)}
+                                    className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                                />
+                                <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Hardware</span>
+                            </label>
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="incidentType"
+                                    value="Software"
+                                    checked={incidentType === 'Software'}
+                                    onChange={(e) => setIncidentType(e.target.value)}
+                                    className="w-4 h-4 text-primary focus:ring-primary border-gray-300"
+                                />
+                                <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Software</span>
+                            </label>
+                        </div>
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="title">Título</Label>
                         <Input

@@ -18,6 +18,9 @@ if (user) {
 	if (profile?.role === "administrador") {
 		return Astro.redirect("/admin");
 	}
+	if (profile?.role === "superadmin") {
+		return Astro.redirect("/superadmin");
+	}
 	return Astro.redirect("/dashboard");
 }
 

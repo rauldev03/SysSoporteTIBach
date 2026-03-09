@@ -9,7 +9,6 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import LogoutButton from "@/components/LogoutButton";
 import TicketForm from "@/components/TicketForm";
 import TicketList, { type Ticket } from "@/components/TicketList";
-import AppointmentForm from "@/components/AppointmentForm";
 
 // --- LÓGICA DE PROTECCIÓN DE RUTA (LA PARTE CRÍTICA) ---
 
@@ -43,6 +42,10 @@ if (profile?.role === "administrador") {
     console.log("[DASHBOARD.ASTRO] Profile is admin, redirecting to /admin");
     return Astro.redirect("/admin");
 }
+if (profile?.role === "superadmin") {
+    console.log("[DASHBOARD.ASTRO] Profile is superadmin, redirecting to /superadmin");
+    return Astro.redirect("/superadmin");
+}
 
 // Si llegamos hasta aquí, significa que la sesión es VÁLIDA.
 
@@ -64,8 +67,8 @@ if (tickets) {
         <div class="max-w-7xl mx-auto space-y-8">
             <header class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold">Panel de Cliente</h1>
-                    <p class="text-muted-foreground">
+                    <h1 class="text-3xl font-bold text-[#0a192f]">Panel de Cliente</h1>
+                    <p class="text-[#0a192f]">
                         Bienvenido, <span class="font-semibold"
                             >{user?.email}</span
                         >
@@ -74,15 +77,12 @@ if (tickets) {
                 <LogoutButton client:load />
             </header>
 
-            <main class="grid lg:grid-cols-3 gap-8">
+            <main class="grid lg:grid-cols-2 gap-8">
                 <div class="space-y-4">
                     <TicketForm client:load />
                 </div>
                 <div class="space-y-4">
                     <TicketList tickets={userTickets} />
-                </div>
-                <div class="space-y-4">
-                    <AppointmentForm client:load />
                 </div>
             </main>
         </div>
