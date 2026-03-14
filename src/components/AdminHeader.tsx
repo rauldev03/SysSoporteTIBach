@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { supabase } from '@/lib/supabase/client';
+import ThemeToggle from './ThemeToggle';
 
 interface Notification {
     id: string;
@@ -50,7 +51,7 @@ export default function AdminHeader({ totalTickets = 0 }: { totalTickets?: numbe
         if (error) {
             console.error('Error marking notification as read:', error);
         } else {
-            setNotifications(prev => 
+            setNotifications(prev =>
                 prev.map(n => n.id === id ? { ...n, is_read: true } : n)
             );
             setUnreadCount(prev => Math.max(0, prev - 1));
@@ -69,9 +70,9 @@ export default function AdminHeader({ totalTickets = 0 }: { totalTickets?: numbe
                 .channel('notifications_channel')
                 .on(
                     'postgres_changes',
-                    { 
-                        event: 'INSERT', 
-                        schema: 'public', 
+                    {
+                        event: 'INSERT',
+                        schema: 'public',
                         table: 'notifications',
                         filter: `user_id=eq.${user.id}`
                     },
@@ -94,16 +95,17 @@ export default function AdminHeader({ totalTickets = 0 }: { totalTickets?: numbe
     }, []);
 
     return (
-        <header className="flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200">
+        <header className="flex items-center justify-between px-8 py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
             <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-semibold text-slate-900">Ticket Management</h1>
-                <span className="px-2 py-0.5 text-xs font-medium text-slate-500 bg-slate-100 rounded-full transition-all">
+                <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">Ticket Management</h1>
+                <span className="px-2 py-0.5 text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 dark:text-slate-400 rounded-full transition-all">
                     {totalTickets.toLocaleString()} Total
                 </span>
             </div>
 
             <div className="flex items-center gap-6">
                 <div className="flex items-center gap-3">
+                    <ThemeToggle />
                     <Popover>
                         <PopoverTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-slate-500 hover:text-slate-900 overflow-visible relative">
@@ -125,8 +127,8 @@ export default function AdminHeader({ totalTickets = 0 }: { totalTickets?: numbe
                                     </div>
                                 ) : (
                                     notifications.map((n) => (
-                                        <div 
-                                            key={n.id} 
+                                        <div
+                                            key={n.id}
                                             className={cn(
                                                 "p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors cursor-pointer relative group",
                                                 !n.is_read && "bg-blue-50/30"
@@ -148,7 +150,7 @@ export default function AdminHeader({ totalTickets = 0 }: { totalTickets?: numbe
                                                 </div>
                                             </div>
                                             {!n.is_read && (
-                                                <button 
+                                                <button
                                                     className="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity"
                                                     title="Mark as read"
                                                 >

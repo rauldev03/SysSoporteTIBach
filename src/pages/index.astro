@@ -23,10 +23,206 @@ if (user) {
 	}
 	return Astro.redirect("/dashboard");
 }
-
-return Astro.redirect("/login");
 ---
 
-<Layout title="Inicio">
-	<Welcome />
+<Layout title="SysSoporte | Gestión Eficiente de Tickets">
+	<div class="relative min-h-screen flex flex-col overflow-hidden">
+		<!-- Background Overlay for Contrast -->
+		<div class="absolute inset-0 bg-slate-900/40 z-0"></div>
+
+		<!-- Navigation Overlay -->
+		<header
+			class="absolute top-0 w-full z-20 px-6 py-4 flex justify-between items-center bg-slate-900/20 backdrop-blur-md border-b border-white/10"
+		>
+			<div class="flex items-center gap-2">
+				<div
+					class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg"
+				>
+					<span class="text-white font-bold text-xl">S</span>
+				</div>
+				<span class="text-white font-bold text-xl tracking-tight"
+					>SysSoporte</span
+				>
+			</div>
+			<a
+				href="/login"
+				class="px-6 py-2 bg-white text-slate-900 font-bold rounded-lg hover:bg-slate-100 transition-all shadow-md active:scale-95"
+			>
+				Iniciar Sesión
+			</a>
+		</header>
+
+		<!-- Hero Section -->
+		<main
+			class="relative z-10 flex-1 flex flex-col justify-center items-center text-center px-4 pt-24 pb-16"
+		>
+			<div
+				class="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000"
+			>
+				<div
+					class="inline-block px-4 py-1.5 bg-blue-500/30 backdrop-blur-md border border-blue-400/50 rounded-full mb-4"
+				>
+					<span
+						class="text-blue-100 text-sm font-semibold tracking-wider uppercase drop-shadow-sm"
+						>Plataforma Profesional</span
+					>
+				</div>
+
+				<h1
+					class="text-5xl md:text-7xl font-extrabold text-white leading-tight drop-shadow-2xl"
+				>
+					Simplifica tu Soporte <br />
+					<span class="text-blue-400 drop-shadow-lg"
+						>Eleva tu Eficiencia</span
+					>
+				</h1>
+
+				<p
+					class="text-xl text-white max-w-2xl mx-auto leading-relaxed drop-shadow-md font-medium"
+				>
+					Gestiona tickets, usuarios y técnicos en un solo lugar. Una
+					interfaz diseñada para la velocidad y la claridad en cada
+					paso.
+				</p>
+
+				<div
+					class="flex flex-col sm:flex-row gap-4 justify-center pt-8"
+				>
+					<a
+						href="/login"
+						class="px-8 py-4 bg-primary text-white text-lg font-bold rounded-xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-2 group active:scale-95"
+					>
+						Comenzar Ahora
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-5 w-5 group-hover:translate-x-1 transition-transform"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+						</svg>
+					</a>
+					<button
+						class="px-8 py-4 bg-white/10 backdrop-blur-md text-white text-lg font-bold border border-white/20 rounded-xl hover:bg-white/20 transition-all active:scale-95"
+					>
+						Ver Demo
+					</button>
+				</div>
+			</div>
+
+			<!-- Features Preview Grid -->
+			<div
+				class="max-w-6xl mx-auto mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 text-left animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-300"
+			>
+				<div
+					class="bg-slate-900/60 backdrop-blur-2xl p-8 rounded-2xl border border-white/10 hover:border-blue-400/40 transition-all group shadow-2xl"
+				>
+					<div
+						class="w-12 h-12 bg-blue-500/30 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/40 transition-colors"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 text-blue-300"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+							></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold text-white mb-3">
+						Gestión de Tickets
+					</h3>
+					<p class="text-slate-200 font-medium">
+						Seguimiento detallado en tiempo real con estados
+						visuales claros y prioridades.
+					</p>
+				</div>
+
+				<div
+					class="bg-slate-900/60 backdrop-blur-2xl p-8 rounded-2xl border border-white/10 hover:border-blue-400/40 transition-all group shadow-2xl"
+				>
+					<div
+						class="w-12 h-12 bg-blue-500/30 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/40 transition-colors"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 text-blue-300"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+							></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold text-white mb-3">
+						Administración
+					</h3>
+					<p class="text-slate-200 font-medium">
+						Control total sobre usuarios, técnicos y áreas de
+						atención desde un panel intuitivo.
+					</p>
+				</div>
+
+				<div
+					class="bg-slate-900/60 backdrop-blur-2xl p-8 rounded-2xl border border-white/10 hover:border-blue-400/40 transition-all group shadow-2xl"
+				>
+					<div
+						class="w-12 h-12 bg-blue-500/30 rounded-lg flex items-center justify-center mb-6 group-hover:bg-blue-500/40 transition-colors"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-6 w-6 text-blue-300"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+							></path>
+						</svg>
+					</div>
+					<h3 class="text-xl font-bold text-white mb-3">
+						Estadísticas
+					</h3>
+					<p class="text-slate-200 font-medium">
+						Métricas clave para medir el rendimiento de tu sistema
+						de soporte.
+					</p>
+				</div>
+			</div>
+		</main>
+
+		<!-- Footer -->
+		<footer class="py-8 border-t border-white/10 text-center">
+			<p class="text-slate-500 text-sm">
+				© 2026 SysSoporte. Desarrollado para Hospital Eleazar Guzmán.
+			</p>
+		</footer>
+	</div>
 </Layout>
+
+<style>
+	/* Background animations for better visuals */
+	body {
+		overflow-x: hidden;
+	}
+</style>
